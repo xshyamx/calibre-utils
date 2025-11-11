@@ -15,7 +15,7 @@ split
     :Run ""book.el"" to create ""generate.sh""
      which creates folders for series and
      renames epubs to kebab case using the template
-     <color:blue><series></color>/<color:blue><series-number></color>~--<color:blue><author></color>~--<color:blue><title></color>.epub**;
+     ""<color:blue><series></color>/<color:blue><series-number></color>~--<color:blue><author></color>~--<color:blue><title></color>.epub"";
   }
   partition copy {
     :Copy all "".epub"" files from the calibre
