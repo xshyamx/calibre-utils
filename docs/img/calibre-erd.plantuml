@@ -1,0 +1,63 @@
+@startuml
+' calibre-erd
+header Draft
+title Calibre ERD
+footer 2025-10-20
+
+entity b as "books" {
+  * id
+  --
+  * title
+  * sort
+  * timestamp
+  * pubdate
+  * series_index
+  * author_sort
+  * isbn
+  * lccn
+  * path
+  * flags
+  * uuid
+  * has_cover
+  * last_modified
+}
+entity s as "series" {
+  * id
+  --
+  * name
+  * sort
+}
+entity a as "authors" {
+  * id
+  --
+  * name
+  * sort
+  * link
+}
+entity bal as "books_authors_link" {
+  * id
+  --
+  * book
+  * author
+}
+entity bsl as "books_series_link" {
+  * id
+  --
+  * book
+  * series
+}
+entity data as "data" {
+  * id
+  --
+  * book
+  * format
+  * uncompressed_size
+  * name
+}
+
+a ||--o{ bal	: author
+b ||--o{ bal	: book
+s ||--o{ bsl	: series
+b ||--o{ bsl	: book
+b ||--o{ data	: book
+@enduml

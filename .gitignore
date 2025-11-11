@@ -1,0 +1,9 @@
+.*
+*~
+!.gitignore
+/out
+/raw
+/booklist.html
+/generate.sh
+/*.csv
+/*.db

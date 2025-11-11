@@ -1,0 +1,35 @@
+@startuml
+' flow
+header Draft
+title Flow
+footer 2025-11-11
+skinparam defaultTextAlignment center
+
+partition metadata.rb {
+  :Copy ""metadata.db"" from calibre
+   library folder;
+}
+
+split
+  partition generate.sh {
+    :Run ""book.el"" to create ""generate.sh""
+     which creates folders for series and
+     renames epubs to kebab case using the template
+     <color:blue><series></color>/<color:blue><series-number></color>~--<color:blue><author></color>~--<color:blue><title></color>.epub**;
+  }
+  partition copy {
+    :Copy all "".epub"" files from the calibre
+     library folder into the ""raw"" folder;
+  }
+  :Run ""generate.sh"" to copy renamed files
+   into ""out"" folder;
+  detach
+split again
+  partition booklist.html {
+    :Run ""book-html.el"" to create a
+     ""booklist.html"" which lists all
+     the books as easy to view html;
+  }
+   detach
+end split
+@enduml
