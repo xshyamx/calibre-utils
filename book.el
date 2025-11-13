@@ -8,6 +8,10 @@
 ;;; Code:
 (require 'cl-macs)
 
+(defconst book-directory-book-count 2
+  "Number of standalone books by an author above which an author directory
+will be created")
+
 (defun book-kebab-case (s)
   "Convert to kebab case by splitting on spaces, underscores &
   hyphens"
@@ -15,7 +19,7 @@
     (downcase
      (mapconcat
       (lambda (s) (replace-regexp-in-string "[^[:alnum:]]+" "" s))
-      (split-string s "[[:space:]]+")
+      (split-string (string-replace "-" " " s) "[[:space:]]+")
       "-"))))
 
 (defun book-series (i)
@@ -73,14 +77,22 @@
 				out-dir dir file)))))))
 
     (insert "\n# Standalone books\n\n")
-    (dolist (row (sqlite-select db standalone-sql))
-      (cl-destructuring-bind (id title author) row
-	(let ((file (book-file title author)))
-	  (unless (member file files)
-	    (push file files)
-	    (insert (format "cp \"raw/%s.epub\" \"%s/%s\"\n"
-			    (alist-get id book-files)
-			    out-dir file))))))
+    (dolist (author-books (seq-group-by (lambda (b) (nth 2 b)) (sqlite-select db standalone-sql)))
+      (let ((dir (if (> (length (cdr author-books)) book-directory-book-count)
+		     (book-kebab-case (car author-books)) nil))
+	    (target-dir))
+	(unless (or (null dir) (member dir dirs))
+	  (push dir dirs)
+	  (insert (format "mkdir -p %s/%s\n" out-dir dir)))
+	(setq target-dir (if dir (format "%s/%s" out-dir dir) out-dir))
+	(dolist (book (cdr author-books))
+	  (cl-destructuring-bind (id title author) book
+	    (let ((file (book-file title author)))
+	      (unless (member file files)
+		(push file files)
+		(insert (format "cp \"raw/%s.epub\" \"%s/%s\"\n"
+				(alist-get id book-files)
+				target-dir file))))))))
     (write-file "generate.sh")))
 
 (provide 'book)
