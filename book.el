@@ -52,6 +52,10 @@
 			   (sqlite-select db file-sql ["EPUB"])))
   (with-temp-buffer
     (insert "#!/bin/sh -e\n\n")
+    (insert "if [ ! -d ./raw ]; then\n")
+    (insert "  echo \"Source directory does not exist. Run 'make raw'.\"\n")
+    (insert "  exit 1\n")
+    (insert "fi\n\n")
     (insert (format "mkdir -p %s\n" out-dir))
     (insert "\n# Series books\n\n")
     (dolist (row (sqlite-select db series-sql))
