@@ -12,8 +12,11 @@
   "Convert to kebab case by splitting on spaces, underscores &
   hyphens"
   (save-match-data
-    (replace-regexp-in-string (rx bow (group alpha) "-" (group alpha) "-") "\\1\\2-"
-			      (string-join (split-string (string-replace "'" "" (downcase s)) "[^[:word:]]+") "-"))))
+    (downcase
+     (mapconcat
+      (lambda (s) (replace-regexp-in-string "[^[:alnum:]]+" "" s))
+      (split-string s "[[:space:]]+")
+      "-"))))
 
 (defun book-series (i)
   "Convert the series string to a 2-digit 0 prefixed index"
