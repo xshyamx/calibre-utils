@@ -41,9 +41,17 @@ will be created")
       (format "%s--%s.epub" (book-kebab-case author) (book-kebab-case title))
     (format "%s--%s--%s.epub" (book-series index) (book-kebab-case author) (book-kebab-case title))))
 
+(unless (< 1 (length argv))
+  (message "Not enough arguments. Calibre library & output directory required.")
+  (kill-emacs 1))
 
 (let ((db (sqlite-open "metadata.db"))
-      (file-sql "select book, name from data where format=?")
+      (calibre-library (nth 0 argv))
+      (out-dir (nth 1 argv))
+      (file-sql "select d.book, concat(b.path, '/', d.name) from
+  data as d
+  inner join books as b on b.id = d.book
+  where d.format=?")
       (series-sql "select b.id, b.title, a.name, b.series_index, s.name from
   books as b
   inner join books_authors_link as bal on bal.book = b.id
@@ -57,14 +65,14 @@ will be created")
   inner join authors as a on a.id = bal.author
   where bal.id = ( select min(id) from books_authors_link where book = b.id )
         and not exists (select 1 from books_series_link where book = b.id)")
-      (out-dir "out")
       (file) (dirs) (book-files) (files))
   (setq book-files (mapcar (lambda (l) (cons (nth 0 l) (nth 1 l)))
 			   (sqlite-select db file-sql ["EPUB"])))
   (with-temp-buffer
     (insert "#!/bin/sh -e\n\n")
-    (insert "if [ ! -d ./raw ]; then\n")
-    (insert "  echo \"Source directory does not exist. Run 'make raw'.\"\n")
+    (insert (format "CALIBRE_LIBRARY=\"%s\"\n\n" calibre-library))
+    (insert "if [ ! -d \"$CALIBRE_LIBRARY\" ]; then\n")
+    (insert "  echo \"Source directory does not exist.\"\n")
     (insert "  exit 1\n")
     (insert "fi\n\n")
     (insert (format "mkdir -p %s\n" out-dir))
@@ -72,16 +80,18 @@ will be created")
     (dolist (row (sqlite-select db series-sql))
       (cl-destructuring-bind (id title author index series) row
 	(let ((dir (book-kebab-case series))
-	      (file (book-file title author series index)))
+	      (file (book-file title author series index))
+	      (target-dir))
+	  (setq target-dir (format "%s/%s" out-dir dir))
 	  (unless (member dir dirs)
 	    (push dir dirs)
-	    (insert (format "mkdir -p %s/%s\n" out-dir dir)))
+	    (insert (format "mkdir -p %s\n" target-dir)))
 	  (unless (member file files)
 	    (push file files)
 	    (if (alist-get id book-files)
-		(insert (format "cp \"raw/%s.epub\" \"%s/%s/%s\"\n"
+		(insert (format "cp \"$CALIBRE_LIBRARY/%s.epub\" \"%s/%s\"\n"
 				(alist-get id book-files)
-				out-dir dir file)))))))
+				target-dir file)))))))
 
     (insert "\n# Standalone books\n\n")
     (dolist (author-books (seq-group-by (lambda (b) (nth 2 b)) (sqlite-select db standalone-sql)))
@@ -97,7 +107,7 @@ will be created")
 	    (let ((file (book-file title author)))
 	      (unless (member file files)
 		(push file files)
-		(insert (format "cp \"raw/%s.epub\" \"%s/%s\"\n"
+		(insert (format "cp \"$CALIBRE_LIBRARY/%s.epub\" \"%s/%s\"\n"
 				(alist-get id book-files)
 				target-dir file))))))))
     (write-file "generate.sh")))
