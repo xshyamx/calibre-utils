@@ -7,6 +7,7 @@
 
 ;;; Code:
 (require 'cl-macs)
+(require 'ucs-normalize)
 
 (defconst book-directory-book-count 2
   "Number of standalone books by an author above which an author directory
@@ -19,7 +20,7 @@ will be created")
     (downcase
      (mapconcat
       (lambda (s) (replace-regexp-in-string "[^[:alnum:]]+" "" s))
-      (split-string (string-replace "-" " " s) "[[:space:]]+")
+      (split-string (string-replace "-" " " (book-normalize-string s)) "[[:space:]]+")
       "-"))))
 
 (defun book-series (i)
@@ -28,6 +29,12 @@ will be created")
 	 (y (truncate (- (* 10 i) (* 10 x)))))
     (concat (format "%02d" x)
 	    (if (> y 0) (format "-%02d" y) ""))))
+
+(defun book-normalize-string (s)
+  "Remove non-ascii unicode characters"
+  (replace-regexp-in-string
+   "[^[:ascii:]]" ""
+   (ucs-normalize-NFD-string s)))
 
 (defun book-file (title author &optional series index)
   (if (null series)
