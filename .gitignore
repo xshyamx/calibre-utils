@@ -2,6 +2,7 @@
 *~
 !.gitignore
 /out
+/work
 /booklist.html
 /generate.sh
 /*.csv
