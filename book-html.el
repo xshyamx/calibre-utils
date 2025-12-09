@@ -16,9 +16,18 @@
 (defun book-html-author (s)
   (mapconcat #'book-html--author-unsort
 	     (split-string s " & ")
-	     " <wbr />& "))
+	     " & "))
 
-(let ((db (sqlite-open "metadata.db"))
+(unless (< 0 (length argv))
+  (message "metadata.db file required")
+  (kill-emacs 1))
+
+;; Sometimes opening metadat.db stalls with warning about loading
+;; large files. Uncomment the warning setting to proceed in such
+;; scenarios
+;(setq large-file-warning-threshold nil)
+
+(let ((db (sqlite-open (car argv)))
       (html-file "booklist.html")
       (sql "select b.id, b.author_sort as Author, b.title as Title, s.name as Series, b.series_index as Number from
 	    books as b
@@ -42,6 +51,8 @@
     td { padding: 0.2em 1em; }
     td:first-child { text-align: right; }
     tr:nth-child(even) { background-color: aliceblue; }
+    .author, .series { width: 20% }
+    .title { width: 40% }
     </style>
   </head>
   <body>
@@ -49,25 +60,39 @@
       <thead>
 	<tr>
           <th>Book ID</th>
-          <th>Author</th>
-          <th>Title</th>
-          <th>Series</th>
+          <th class=\"author\">Author</th>
+          <th class=\"title\">Title</th>
+          <th class=\"series\">Series</th>
           <th>Series Number</th>
 	</tr>
       </thead>
-      <tbody>")
-    (dolist (row (sqlite-select db sql))
-      (cl-destructuring-bind (id author title series index) row
-	(insert (format "	<tr>
-	  <td>%s</td>
-	  <td>%s</td>
-	  <td>%s</td>
-	  <td>%s</td>
-	  <td>%s</td>
-	</tr>
-" id (book-html-author author) title (if (null series) "" series) (if (null series) "" index)))))
-    (insert "      </tbody>
+      <tbody>
+      </tbody>
     </table>
+    <script>
+let books = [\n")
+    (insert (mapconcat
+	     (lambda (row)
+	       (cl-destructuring-bind (id author title series index) row
+		 (format "  [\"%s\", %S, %S, %S, \"%s\"]" id (book-html-author author) title (if (null series) "" series) (if (null series) "" index))))
+	     (sqlite-select db sql)
+	     ",\n"))
+    (insert "\n]
+function addBooks() {
+    var tb = document.querySelector('tbody')
+    var tt = document.createElement('tr')
+    tt.innerHTML = '<td></td><td></td><td></td><td></td><td></td>'
+    books.forEach(book => {
+	var tr = tt.cloneNode(true)
+	var tds = tr.querySelectorAll('td')
+	book.forEach((e,i)=>{
+	    tds[i].textContent = e
+	})
+	tb.appendChild(tr)
+    })
+}
+window.addEventListener('load', addBooks)
+   </script>
   </body>
 </html>")
     (write-file html-file)))

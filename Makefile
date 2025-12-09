@@ -17,7 +17,7 @@ generate.sh: metadata.db
 	chmod +x generate.sh
 
 booklist.html: metadata.db
-	emacs -q --script book-html.el
+	emacs -q --script book-html.el metadata.db
 
 optimize: $(OUT_DIR)
 	./reduce-book-size.sh
