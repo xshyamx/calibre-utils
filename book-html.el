@@ -53,22 +53,31 @@
     tr:nth-child(even) { background-color: aliceblue; }
     .author, .series { width: 20% }
     .title { width: 40% }
+    header { display: grid; grid-template: 1/2; grid-template-columns: 80% 20%; }
     </style>
   </head>
   <body>
-    <table>
-      <thead>
-	<tr>
-          <th>Book ID</th>
-          <th class=\"author\">Author</th>
-          <th class=\"title\">Title</th>
-          <th class=\"series\">Series</th>
-          <th>Series Number</th>
-	</tr>
-      </thead>
-      <tbody>
-      </tbody>
-    </table>
+    <header>
+      <h1>Book List</h1>
+      <aside>
+	<button>Download CSV</button>
+      </aside>
+    </header>
+    <main>
+      <table>
+	<thead>
+	  <tr>
+            <th>Book ID</th>
+            <th class=\"author\">Author</th>
+            <th class=\"title\">Title</th>
+            <th class=\"series\">Series</th>
+            <th>Series Number</th>
+	  </tr>
+	</thead>
+	<tbody>
+	</tbody>
+      </table>
+    </main>
     <script>
 let books = [\n")
     (insert (mapconcat
@@ -79,6 +88,7 @@ let books = [\n")
 	     ",\n"))
     (insert "\n]
 function addBooks() {
+    document.querySelector('header button').addEventListener('click', downloadCsv)
     var tb = document.querySelector('tbody')
     var tt = document.createElement('tr')
     tt.innerHTML = '<td></td><td></td><td></td><td></td><td></td>'
@@ -90,6 +100,16 @@ function addBooks() {
 	})
 	tb.appendChild(tr)
     })
+}
+function downloadCsv(evt) {
+    evt.preventDefault()
+    let rows = [['Book ID','Author','Title','Series','Series Number'], ...books];
+    let csv = rows.map(row => row.map(c => `\"${c}\"`).join(',')).join('\\n')
+    let b = new Blob([csv], {type: 'text/csv'})
+    let a = document.createElement('a')
+    a.href = URL.createObjectURL(b)
+    a.download = 'booklist.csv'
+    a.click()
 }
 window.addEventListener('load', addBooks)
    </script>
