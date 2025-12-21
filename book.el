@@ -28,7 +28,7 @@ will be created")
   (let* ((x (truncate i))
 	 (y (truncate (- (* 10 i) (* 10 x)))))
     (concat (format "%02d" x)
-	    (if (> y 0) (format "-%02d" y) ""))))
+	    (if (> y 0) (format "p%d" y) ""))))
 
 (defun book-normalize-string (s)
   "Remove non-ascii unicode characters"

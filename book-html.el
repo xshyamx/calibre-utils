@@ -25,7 +25,7 @@
 ;; Sometimes opening metadat.db stalls with warning about loading
 ;; large files. Uncomment the warning setting to proceed in such
 ;; scenarios
-;(setq large-file-warning-threshold nil)
+(setq large-file-warning-threshold nil)
 
 (let ((db (sqlite-open (car argv)))
       (html-file "booklist.html")

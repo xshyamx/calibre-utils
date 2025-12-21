@@ -19,7 +19,7 @@ Calibre stores books in the following directory structure
 where the author name & title are in title-case with spaces. Instead I want to easily navigate to series and prefer kebab-cased names. So, the directory structure uses
 
 ```
-<series>/<series-index>--<author>--<title>.epub
+<series>/<major-series>p<minor-series>--<author>--<title>.epub
 ```
 
 This is achieved by copying the sqlite database used by calibre and extracting the metadata out of it. The relevant schema is given below
@@ -36,4 +36,4 @@ Calibre has the calibre server which can serve up the library as a website but, 
 | Author | Book authors separated by '&' |
 | Title | Book title |
 | Series | Series name the book belongs to |
-| Series Number | Order of the book in the given series |
+| Series Number | Order of the book in the given series. Books inbetween major books eg. `0.5` will be translated to `00p5`  |
