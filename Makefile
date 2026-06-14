@@ -1,5 +1,5 @@
 .phony: clean optimize kill_optmize
-
+include Makefile.local
 CALIBRE_LIBRARY = "$(HOME)/Calibre Library"
 OUT_DIR = ./out
 

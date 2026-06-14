@@ -4,6 +4,7 @@
 /out
 /work
 /booklist.html
-/generate.sh
+/*.sh
 /*.csv
 /*.db
+/*.local
