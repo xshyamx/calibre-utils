@@ -65,6 +65,13 @@ will be created")
   inner join authors as a on a.id = bal.author
   where bal.id = ( select min(id) from books_authors_link where book = b.id )
         and not exists (select 1 from books_series_link where book = b.id)")
+      (tag-sql "select b.id, b.title, a.name from
+  books as b
+  inner join books_authors_link as bal on bal.book = b.id
+  inner join authors as a on a.id = bal.author
+  inner join books_tags_link as btl on btl.book = b.id
+  inner join tags as t on t.id = btl.tag
+  where t.name = ?")
       (file) (dirs) (book-files) (files)
       (first-series t))
   (setq book-files (mapcar (lambda (l) (cons (nth 0 l) (nth 1 l)))
@@ -119,6 +126,25 @@ will be created")
 				(alist-get id book-files)
 				target-dir file)))))))
     (insert "log\n\n")
+    ;; non-fiction
+    (insert "\n# Non-fiction books\n\n")
+    (insert "logp \"non-fiction\"\n")
+
+    (let* ((dir "non-fiction")
+	   (target-dir (format "%s/%s" out-dir dir)))
+      (unless (member dir dirs)
+	(push dir dirs)
+	(insert (format "mkdir -p %s/%s\n" out-dir dir)))
+      (dolist (book (sqlite-select db tag-sql '("Non-fiction")))
+	(cl-destructuring-bind (id title author) book
+	  (let ((file (book-file title author)))
+	    (unless (member file files)
+	      (push file files)
+	      (insert (format "cp \"$CALIBRE_LIBRARY/%s.epub\" \"%s/%s\"\n"
+			      (alist-get id book-files)
+			      target-dir file))))))
+      (insert "log\n"))
+
     ;; standalones
     (insert "\n# Standalone books\n\n")
     (insert "log \"# Standalones\"\n")
