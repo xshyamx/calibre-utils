@@ -1,7 +1,16 @@
-.phony: clean optimize kill_optmize
-include Makefile.local
+.phony: clean optimize kill_optmize help
 CALIBRE_LIBRARY = "$(HOME)/Calibre Library"
 OUT_DIR = ./out
+
+help:
+	@echo Available targets
+	@echo '================='
+	@echo 'clean         - Removes all generated files'
+	@echo 'raw           - Copies epub files from Calibre library'
+	@echo 'metadata.db   - Copies the Calibre metadata database'
+	@echo 'generate.sh   - Generates shell script to copy by series'
+	@echo 'booklist.html - Generates html book list'
+
 
 clean:
 	rm -rf raw work metadata.db generate.sh generate.sh~ out booklist.html
@@ -24,3 +33,5 @@ optimize: $(OUT_DIR)
 
 kill_optimize:
 	ps -ef | awk '/reduce-book-size.sh/ {print $$2}' | head -1 | xargs kill
+
+include Makefile.local
