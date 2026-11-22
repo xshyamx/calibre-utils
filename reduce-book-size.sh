@@ -13,7 +13,7 @@ printf "Before: %s\n" $size
 
 mkdir -p $WORK_DIR
 
-SIZE_THRESHOLD=3M
+SIZE_THRESHOLD=10M
 RESIZE_THRESHOLD=768
 # try to optimize files > SIZE_THRESHOLD
 echo "Optimizing books with filesize > ${SIZE_THRESHOLD} by resizing images to be atmost ${RESIZE_THRESHOLD}px"
@@ -30,9 +30,16 @@ function reduce_book() {
     if [ "$img_dir" != "" -a -d $img_dir ]; then
 	pushd $img_dir >/dev/null
 	find . -name '*.jpg' -o -name '*.jpeg' -o -name '*.gif' -o -name '*.png' > list
+	i=0
+	n=$(wc -l list | awk '{print $1}')
+	d=$(expr $n / 5)
 	while read f ; do
-	    printf "."
-	    magick $f -resize "${RESIZE_THRESHOLD}>x${RESIZE_THRESHOLD}>" $f
+	    i=$(expr $i + 1)
+	    r=$(expr $i % $d)
+	    if [ $r -eq 0 ]; then
+		printf "."
+	    fi
+	    magick $f -resize "${RESIZE_THRESHOLD}x${RESIZE_THRESHOLD}>" $f 2>/dev/null
 	done < list
 	popd >/dev/null
     fi
@@ -53,7 +60,11 @@ function reduce_book() {
     rm -fr $WORK_DIR/zip $WORK_DIR/extracted
 }
 
+nb=$(wc -l $WORK_DIR/list | awk '{print $1}')
+ni=0
 while read file; do
+    ni=$(expr $ni + 1)
+    printf "[%d/%d] " $ni $nb
     reduce_book "$file"
 done < $WORK_DIR/list
 size=$(du -sh $SRC_DIR | cut -f 1)
