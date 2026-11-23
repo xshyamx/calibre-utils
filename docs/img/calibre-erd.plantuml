@@ -2,7 +2,7 @@
 ' calibre-erd
 header Draft
 title Calibre ERD
-footer 2025-10-20
+footer 2026-11-23
 
 entity b as "books" {
   * id
@@ -54,10 +54,24 @@ entity data as "data" {
   * uncompressed_size
   * name
 }
+entity t as "tags" {
+  * id
+  --
+  * name
+  * link
+}
+entity btl as "books_tags_link" {
+  * id
+  --
+  * book
+  * tag
+}
 
-a ||--o{ bal	: author
-b ||--o{ bal	: book
-s ||--o{ bsl	: series
-b ||--o{ bsl	: book
-b ||--o{ data	: book
+a ||--o{ bal  : author
+b ||--o{ bal  : book
+s ||--o{ bsl  : series
+b ||--o{ bsl  : book
+b ||--o{ data : book
+t ||--o{ btl  : tag
+b ||--o{ btl  : book
 @enduml
