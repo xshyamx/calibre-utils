@@ -1,4 +1,4 @@
-# Calibre Utils #
+# Calibre Utils
 
 Utility scripts to work with a calibre library for
 
@@ -8,7 +8,7 @@ Utility scripts to work with a calibre library for
 ![Flow](docs/img/flow.png)
 
 
-## Copy books grouped by series ##
+## Copy books grouped by series
 
 Calibre stores books in the following directory structure
 
@@ -26,7 +26,13 @@ This is achieved by copying the sqlite database used by calibre and extracting t
 
 ![Calibre Schema](docs/img/calibre-erd.png)
 
-## Export html view of the library ##
+
+### Extras
+
+* Creates separate `non-fiction` folder for books tagged as **Non-Fiction**
+* Creates separate `<author>` folder for authors with more than 2 standalone books
+
+## Export html view of the library
 
 Calibre has the calibre server which can serve up the library as a website but, I find it easier to scan through the books as csv/html. The export contains the following columns
 

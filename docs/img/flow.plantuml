@@ -4,6 +4,7 @@ header Draft
 title Flow
 footer 2026-11-23
 skinparam defaultTextAlignment center
+skinparam noteTextAlignment left
 
 partition metadata.rb {
   :Copy **metadata.db** from calibre
